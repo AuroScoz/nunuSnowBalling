@@ -1,0 +1,5 @@
+{"Equip":[
+	{	"ID": 1,	"Odds": 10,	"Ref": "hammer",	"AttackParticle": "Hammer"},
+	{	"ID": 2,	"Odds": 30,	"Ref": "soulbreaker",	"AttackParticle": "Soulbreaker"},
+	{	"ID": 3,	"Odds": 80,	"Ref": "horn",	"AttackParticle": "Horn"}
+]}

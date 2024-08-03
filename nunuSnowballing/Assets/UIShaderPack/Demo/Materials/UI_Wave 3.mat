@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: UI_Wave 3
+  m_Shader: {fileID: 4800000, guid: e09acb68f44740143b2a6ede7f24c21e, type: 3}
+  m_ShaderKeywords: _USECOLOUR2_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _ColorMask: 15
+    - _Edge: 3
+    - _FoamEdge: 0
+    - _FoamSize: 0.2
+    - _FoamSmoothness: 0.2
+    - _Height: 0.304
+    - _Offset: 0.278
+    - _Speed: 1.4
+    - _Stencil: 0
+    - _StencilComp: 8
+    - _StencilOp: 0
+    - _StencilReadMask: 255
+    - _StencilWriteMask: 255
+    - _UseColor2: 1
+    - _UseUIAlphaClip: 0
+    - _Width: 0.5
+    m_Colors:
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color2: {r: 1, g: 0.6027826, b: 0.21226418, a: 1}
+    - _FoamColor: {r: 0.9528302, g: 0.8166734, b: 0.22921856, a: 1}

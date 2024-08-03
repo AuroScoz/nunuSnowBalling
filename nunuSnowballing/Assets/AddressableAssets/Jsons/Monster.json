@@ -1,0 +1,5 @@
+{"Monster":[
+	{	"ID": 1,	"MonsterType": "Minion",	"Odds": 10,	"Ref": "skeleton",	"AttackParticle": "Claw/Claw"},
+	{	"ID": 2,	"MonsterType": "Elite",	"Odds": 30,	"Ref": "gargoyle",	"AttackParticle": "Claw/Claw"},
+	{	"ID": 3,	"MonsterType": "Boss",	"Odds": 80,	"Ref": "destroyer",	"AttackParticle": "Claw/Claw"}
+]}
