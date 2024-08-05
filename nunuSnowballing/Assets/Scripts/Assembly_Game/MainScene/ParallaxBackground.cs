@@ -1,15 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.Experimental.GraphView.GraphView;
 namespace nunuSnowBalling.Main {
     public class ParallaxBackground : MonoBehaviour {
 
         [System.Serializable]
         public class ParallaxLayer {
-            public Transform[] ImgTrans; // 每层至少两个背景图片
+            public Transform[] ImgTrans;
             public float Spd;
-            public float BGWidth; // 背景图片的宽度，应该与摄像机的宽度一致
+            public float BGWidth;
             public int FirstIdx { get; private set; }
             public void SetFirstIdx(int _idx) {
                 FirstIdx = _idx;
@@ -41,6 +40,7 @@ namespace nunuSnowBalling.Main {
         }
 
         public void ResetSpdRate() {
+            Stop();
             SpdRate = 1;
         }
         public void AddSpdRate(float _value) {

@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using nunuSnowBalling.Socket.Matchgame;
 using Scoz.Func;
 using System;
 using System.Collections;
@@ -23,27 +24,18 @@ namespace nunuSnowBalling.Main {
         [SerializeField] float SpdRateAdd;
 
         public static MainManager Instance;
-        public int PlayerBet { get; private set; }
+        public int PlayerBet { get { return PlayerInfoUI.GetInstance<PlayerInfoUI>().CurBet; } }
 
         float CurOdds;
         float CurProb { get { return RTP / CurOdds; } }
-        public long CurReward { get { return (long)(CurOdds * (float)PlayerBet); } }
+        public int CurReward { get { return (int)(CurOdds * (float)PlayerBet); } }
 
         bool RoleSlide = false;
 
         public GameState CurState { get; private set; } = GameState.Betting;
 
-        private void OnEnable() {
-
-        }
-
-        private void Start() {
-            Init();
-        }
-
         public void Init() {
             Instance = this;
-            PlayerBet = 10;
             new GamePlayer();
             ResetGame();
             AddCamStack(UICam.Instance.MyCam);
@@ -63,53 +55,70 @@ namespace nunuSnowBalling.Main {
             cameraData.cameraStack.Add(_cam);
         }
 
-        private void Update() {
-            if (Input.GetKeyDown(KeyCode.Q)) {
-                Play();
-            } else if (Input.GetKeyDown(KeyCode.W)) {
-                GetReward();
-            }
-
-        }
-
         async UniTask PlayLoop() {
             while (CurState == GameState.Playing) {
                 CurOdds += OddsAdd;
                 MyParallaxBackground.AddSpdRate(SpdRateAdd);
-                if (!RoleSlide && MyParallaxBackground.SpdRate > 1.3f) {
+                if (!RoleSlide && CurOdds > 0.8f) {
                     RoleSlide = true;
                     MyRole.SetAni("slide");
                 }
                 WriteLog.LogColor("CurProb=" + CurProb, WriteLog.LogType.Debug);
-                //if (!Prob.GetResult(CurProb)) {
-                //    ResetGame();
-                //}
+                if (!Prob.GetResult(CurProb)) Lose();
                 await UniTask.Delay(OddsAddMiliSecs);
             }
         }
-
+        void Lose() {
+            MyRole.SetAni("jump");
+            WriteHistory(false);
+            EndGame();
+        }
 
         void ResetGame() {
+            RoleSlide = false;
             MyRole.SetAni("idle");
-            CurOdds = 1;
-            MyParallaxBackground.Stop();
+            CurOdds = DefaultOdds;
             MyParallaxBackground.ResetSpdRate();
+            CurState = GameState.Betting;
+            MainSceneUI.GetInstance<MainSceneUI>().RefreshUI();
+        }
+        void EndGame() {
+            MyParallaxBackground.Stop();
             CurState = GameState.End;
+            UniTask.Void(async () => {
+                await UniTask.Delay(1000);
+                ResetGame();
+            });
         }
 
         public void Play() {
+            if (CurState != GameState.Betting) return;
             MyRole.SetAni("walk");
             MyParallaxBackground.Play();
             GamePlayer.Instance.AddPt(-PlayerBet);
+            PlayerInfoUI.GetInstance<PlayerInfoUI>().AddPlayerPT(-PlayerBet);
             CurState = GameState.Playing;
             UniTask.Create(PlayLoop);
         }
 
         public void GetReward() {
+            if (CurState != GameState.Playing) return;
+            MyRole.SetAni("idle");
             GamePlayer.Instance.AddPt(CurReward);
-            WriteLog.LogError($"贏得{CurReward}金幣");
-            ResetGame();
+            PlayerInfoUI.GetInstance<PlayerInfoUI>().AddPlayerPT(CurReward);
+            WriteHistory(true);
+            EndGame();
         }
+        void WriteHistory(bool _win) {
+            if (_win) {
+                while (true) {
+                    CurOdds += OddsAdd;
+                    if (!Prob.GetResult(CurProb)) break;
+                }
+            }
+            HistoryUI.GetInstance<HistoryUI>().Add(CurOdds);
+        }
+
 
 
 

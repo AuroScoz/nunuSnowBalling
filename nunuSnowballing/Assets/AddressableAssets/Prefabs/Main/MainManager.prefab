@@ -772,11 +772,11 @@ MonoBehaviour:
   SceneCam: {fileID: 3939877173597159113}
   MyParallaxBackground: {fileID: 693914398050703922}
   MyRole: {fileID: 1153187843252000212}
-  DefaultOdds: 1
-  OddsAdd: 0.1
-  OddsAddMiliSecs: 200
+  DefaultOdds: 0.5
+  OddsAdd: 0.02
+  OddsAddMiliSecs: 50
   RTP: 0.95
-  SpdRateAdd: 0.05
+  SpdRateAdd: 0.02
 --- !u!1 &5841890028011009653
 GameObject:
   m_ObjectHideFlags: 0
