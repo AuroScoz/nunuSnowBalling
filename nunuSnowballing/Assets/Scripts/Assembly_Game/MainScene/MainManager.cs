@@ -17,18 +17,18 @@ namespace nunuSnowBalling.Main {
         [SerializeField] Camera SceneCam;
         [SerializeField] ParallaxBackground MyParallaxBackground;
         [SerializeField] Role MyRole;
-        [SerializeField] float DefaultOdds;
         [SerializeField] float OddsAdd;
         [SerializeField] int OddsAddMiliSecs;
         [SerializeField] float RTP;
         [SerializeField] float SpdRateAdd;
 
+        float defaultOdds = 1f;
         public static MainManager Instance;
         public int PlayerBet { get { return PlayerInfoUI.GetInstance<PlayerInfoUI>().CurBet; } }
 
-        float CurOdds;
-        float CurProb { get { return RTP / CurOdds; } }
-        public int CurReward { get { return (int)(CurOdds * (float)PlayerBet); } }
+        float curOdds;
+        public int curReward { get { return (int)(curOdds * (float)PlayerBet); } }
+        float resultOdds;
 
         bool RoleSlide = false;
 
@@ -57,32 +57,33 @@ namespace nunuSnowBalling.Main {
 
         async UniTask PlayLoop() {
             while (CurState == GameState.Playing) {
-                CurOdds += OddsAdd;
+
                 MyParallaxBackground.AddSpdRate(SpdRateAdd);
-                if (!RoleSlide && CurOdds > 0.8f) {
+                if (!RoleSlide && curOdds > 1.2f) {
                     RoleSlide = true;
                     MyRole.SetAni("slide");
                 }
-                WriteLog.LogColor("CurProb=" + CurProb, WriteLog.LogType.Debug);
-                if (!Prob.GetResult(CurProb)) Lose();
+                curOdds += OddsAdd;
+                if (curOdds > resultOdds) Lose();
+
                 await UniTask.Delay(OddsAddMiliSecs);
             }
         }
         void Lose() {
             MyRole.SetAni("jump");
-            WriteHistory(false);
             EndGame();
         }
 
         void ResetGame() {
             RoleSlide = false;
             MyRole.SetAni("idle");
-            CurOdds = DefaultOdds;
+            curOdds = defaultOdds;
             MyParallaxBackground.ResetSpdRate();
             CurState = GameState.Betting;
             MainSceneUI.GetInstance<MainSceneUI>().RefreshUI();
         }
         void EndGame() {
+            HistoryUI.GetInstance<HistoryUI>().Add(curOdds);
             MyParallaxBackground.Stop();
             CurState = GameState.End;
             UniTask.Void(async () => {
@@ -91,8 +92,33 @@ namespace nunuSnowBalling.Main {
             });
         }
 
+        void Test() {
+            float playerPT = 100000;
+            float curPT = playerPT;
+            float count = 10;
+            float winRate = 0.5f;
+            float curRTP = 0.95f;
+            float totalBet = 0;
+            float totalWin = 0;
+            for (int i = 0; i < count; i++) {
+                curPT -= 1;
+                totalBet += 1;
+                resultOdds = GetResultOdds(curRTP);
+                if (Prob.GetResult(winRate)) {
+                    curPT += resultOdds;
+                    totalWin += resultOdds;
+                }
+                curRTP = totalWin / totalBet;
+            }
+            WriteLog.LogError("curRTP=" + curRTP);
+        }
+
         public void Play() {
             if (CurState != GameState.Betting) return;
+            Test();
+            return;
+
+            WriteLog.LogError("resultOdds=" + resultOdds);
             MyRole.SetAni("walk");
             MyParallaxBackground.Play();
             GamePlayer.Instance.AddPt(-PlayerBet);
@@ -104,19 +130,24 @@ namespace nunuSnowBalling.Main {
         public void GetReward() {
             if (CurState != GameState.Playing) return;
             MyRole.SetAni("idle");
-            GamePlayer.Instance.AddPt(CurReward);
-            PlayerInfoUI.GetInstance<PlayerInfoUI>().AddPlayerPT(CurReward);
-            WriteHistory(true);
+            GamePlayer.Instance.AddPt(curReward);
+            PlayerInfoUI.GetInstance<PlayerInfoUI>().AddPlayerPT(curReward);
             EndGame();
         }
-        void WriteHistory(bool _win) {
-            if (_win) {
-                while (true) {
-                    CurOdds += OddsAdd;
-                    if (!Prob.GetResult(CurProb)) break;
+        float GetResultOdds(float _curRTP) {
+            resultOdds = defaultOdds;
+            float tmpOdds = defaultOdds;
+            while (true) {
+                var prob = RTP * tmpOdds / (tmpOdds + OddsAdd);
+                tmpOdds += OddsAdd;
+                if (prob >= 0.99) {
+                    WriteLog.LogError($"prob={prob} _curRTP={_curRTP} tmpOdds={tmpOdds}");
+                    break;
                 }
+                if (!Prob.GetResult(prob)) break;
+                else resultOdds = tmpOdds;
             }
-            HistoryUI.GetInstance<HistoryUI>().Add(CurOdds);
+            return resultOdds;
         }
 
 

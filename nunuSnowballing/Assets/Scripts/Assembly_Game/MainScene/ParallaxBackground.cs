@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using Scoz.Func;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 namespace nunuSnowBalling.Main {
@@ -34,13 +36,14 @@ namespace nunuSnowBalling.Main {
 
         public void Play() {
             Playing = true;
+            WriteLog.LogError("Play");
         }
         public void Stop() {
             Playing = false;
+            WriteLog.LogError("Stop");
         }
 
         public void ResetSpdRate() {
-            Stop();
             SpdRate = 1;
         }
         public void AddSpdRate(float _value) {
